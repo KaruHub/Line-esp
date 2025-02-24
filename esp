@@ -60,7 +60,7 @@ local function CreateESP(player)
             Box.Position = Vector2.new(position.X - size / 2, position.Y - size * 1.5 / 2)
             Box.Visible = ESPEnabled
 
-            -- Update the tracer
+            -- Update the tracer (360° effect)
             Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y) -- Bottom center of the screen
             Tracer.To = Vector2.new(position.X, position.Y) -- Player's position
             Tracer.Visible = ESPEnabled
