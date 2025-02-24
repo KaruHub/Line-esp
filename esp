@@ -1,17 +1,29 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 
--- Player setup
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+-- Creating the Window
+local Window = OrionLib:MakeWindow({
+    Name = "Bridge Teleporter & ESP",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "OrionTest"
+})
 
--- ESP setup
-local highlightColor = Color3.fromRGB(255, 0, 0) -- Default red
-local refreshInterval = 3 -- Refresh every 3 seconds
-local espEnabled = false -- Toggle state
-local espObjects = {} -- Stores ESP objects
+-- Create a Player tab
+local PlayerTab = Window:MakeTab({
+    Name = "Player",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
--- List of possible bridge model names (teleport to specific bridge from dropdown)
-local bridgeNames = {"BlueBridge", "CyanBridge", "GreenBridge", "OrangeBridge", "PinkBridge", "PurpleBridge", "RedBridge", "YellowBridge"}
+-- Create a section in the Player Tab for ESP
+local ESPSection = PlayerTab:AddSection({
+    Name = "ESP Settings"
+})
+
+-- ESP functionality
+local espEnabled = false
+local espObjects = {}
+local highlightColor = Color3.fromRGB(255, 0, 0)  -- Default red color for ESP
 
 -- Function to create ESP
 local function createESP(player)
@@ -40,58 +52,59 @@ local function removeESP(player)
     end
 end
 
--- Function to toggle ESP
-local function toggleESP()
-    espEnabled = not espEnabled
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= game.Players.LocalPlayer then
-            if espEnabled then createESP(player) else removeESP(player) end
+-- Toggle ESP button
+PlayerTab:AddToggle({
+    Name = "Enable ESP",
+    Default = false,
+    Callback = function(Value)
+        espEnabled = Value
+        if espEnabled then
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer then
+                    createESP(player)
+                end
+            end
+        else
+            for _, player in pairs(game.Players:GetPlayers()) do
+                removeESP(player)
+            end
         end
     end
-end
-
--- Function to teleport to selected bridge
-local function teleportToBridge(bridgeName)
-    -- Find the model in Workspace
-    local bridgeModel = game.Workspace:FindFirstChild(bridgeName)
-    
-    if bridgeModel then
-        -- Get the position of the bridge model
-        local bridgePosition = bridgeModel.PrimaryPart and bridgeModel.PrimaryPart.Position or bridgeModel:GetModelCFrame().Position
-        
-        -- Teleport the player's character to the bridge position
-        character:SetPrimaryPartCFrame(CFrame.new(bridgePosition))
-    else
-        warn(bridgeName .. " not found in Workspace!")
-    end
-end
-
--- Create the OrionLib window
-local Window = OrionLib:MakeWindow({
-    Name = "Bridge Teleporter & ESP",
-    HidePremium = false,
-    SaveConfig = true,
-    ConfigFolder = "OrionTest"
 })
 
--- Create a Tab for the main section
-local Tab = Window:MakeTab({
+-- ESP Color Picker
+PlayerTab:AddColorpicker({
+    Name = "ESP Color",
+    Default = Color3.fromRGB(255, 0, 0),
+    Callback = function(Value)
+        highlightColor = Value
+        if espEnabled then
+            for player, _ in pairs(espObjects) do
+                removeESP(player)
+                createESP(player)
+            end
+        end
+    end
+})
+
+-- Create a Main Tab
+local MainTab = Window:MakeTab({
     Name = "Main",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
--- Create a Section for the Get All Items button
-Tab:AddSection({
-    Name = "Actions"
+-- Main Section
+local MainSection = MainTab:AddSection({
+    Name = "Main Actions"
 })
 
--- Add a button to get all items
-Tab:AddButton({
+-- Get All Items Button
+MainTab:AddButton({
     Name = "Get All Items",
     Callback = function()
-        local remoteEvent = game.ReplicatedStorage:WaitForChild("SpawnGalaxyBlock") -- Adjust to where your RemoteEvent is located
-        
+        local remoteEvent = game.ReplicatedStorage:WaitForChild("SpawnGalaxyBlock")
+
         local function fireRemoteEvent()
             local duration = 3 -- Duration in seconds
             local interval = 0.001 -- Interval in seconds
@@ -107,106 +120,54 @@ Tab:AddButton({
     end
 })
 
--- Create a Section for the No Fall checkbox
-Tab:AddSection({
-    Name = "No Fall"
-})
-
--- Add a checkbox for No Fall
-Tab:AddCheckbox({
+-- No Fall Toggle (Checkbox)
+MainTab:AddToggle({
     Name = "Enable No Fall",
     Default = false,
     Callback = function(Value)
         if Value then
-            -- Create the part for fall protection
+            -- Create the part for No Fall protection
             local part = Instance.new("Part")
-            part.Size = Vector3.new(1000, 1, 1000) -- Set a normal height (1) but still make it extremely wide
-            part.Position = Vector3.new(-948, 189, -86)  -- Set the position at X = -948, Y = 189, Z = -86
-            part.Anchored = true  -- Anchor the part so it doesn't fall
-            part.BrickColor = BrickColor.Red()  -- Set the BrickColor to ReallyRed
-            part.Material = Enum.Material.ForceField  -- Set the material to ForceField
-            part.Reflectance = 1  -- Set the reflectance to 1
-            part.Transparency = 0  -- Set transparency to 0 (fully visible)
-            part.Parent = game.Workspace  -- Parent the part to Workspace
-            part.Name = "NoFallPart" -- Name it for later reference
+            part.Size = Vector3.new(1000, 1, 1000)
+            part.Position = Vector3.new(-948, 189, -86)
+            part.Anchored = true
+            part.BrickColor = BrickColor.Red()
+            part.Material = Enum.Material.ForceField
+            part.Reflectance = 1
+            part.Transparency = 0
+            part.Parent = game.Workspace
+            part.Name = "NoFallPart"
         else
-            -- If disabled, remove the part to allow falling again
+            -- Remove No Fall protection part
             local part = game.Workspace:FindFirstChild("NoFallPart")
-            if part then
-                part:Destroy()
-            end
+            if part then part:Destroy() end
         end
     end
 })
 
--- Create the Player Tab for ESP
-local PlayerTab = Window:MakeTab({
-    Name = "Player",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
+-- Create a Teleport Section
+local TeleportSection = MainTab:AddSection({
+    Name = "Teleport"
 })
 
--- Create a Section for ESP functionality
-local SectionESP = PlayerTab:AddSection({
-    Name = "ESP Section"
-})
+-- Bridge Teleport Dropdown
+local bridgeNames = {"BlueBridge", "CyanBridge", "GreenBridge", "OrangeBridge", "PinkBridge", "PurpleBridge", "RedBridge", "YellowBridge"}
 
--- Add a Color Picker for the ESP color
-PlayerTab:AddColorpicker({
-    Name = "ESP Color Picker",
-    Default = Color3.fromRGB(255, 0, 0),  -- Default to red
-    Callback = function(Value)
-        highlightColor = Value
-        -- Refresh ESP
-        if espEnabled then
-            for player, _ in pairs(espObjects) do
-                removeESP(player)
-                createESP(player)
-            end
-        end
-    end    
-})
-
--- Add a Toggle to enable/disable ESP
-PlayerTab:AddToggle({
-    Name = "Enable ESP",
-    Default = false,
-    Callback = function(Value)
-        espEnabled = Value
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer then
-                if espEnabled then createESP(player) else removeESP(player) end
-            end
-        end
-    end
-})
-
--- Create a Section for the Teleportation functionality
-local SectionTP = PlayerTab:AddSection({
-    Name = "Teleport Section"
-})
-
--- Add a Dropdown menu to select a bridge
-PlayerTab:AddDropdown({
+MainTab:AddDropdown({
     Name = "Select Bridge",
-    Default = bridgeNames[1],  -- Default to the first bridge in the list
-    Options = bridgeNames,  -- List of bridge names
+    Default = bridgeNames[1],  -- Default bridge
+    Options = bridgeNames,
     Callback = function(selectedBridge)
         -- Teleport to the selected bridge
-        teleportToBridge(selectedBridge)
-    end    
-})
-
--- Initialize the OrionLib interface
-OrionLib:Init()
-
--- Periodic refresh to update ESP
-while true do
-    wait(refreshInterval)
-    if espEnabled then
-        for player, _ in pairs(espObjects) do
-            removeESP(player)
-            createESP(player)
+        local bridgeModel = game.Workspace:FindFirstChild(selectedBridge)
+        if bridgeModel then
+            local bridgePosition = bridgeModel.PrimaryPart and bridgeModel.PrimaryPart.Position or bridgeModel:GetModelCFrame().Position
+            game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(bridgePosition))
+        else
+            warn(selectedBridge .. " not found in Workspace!")
         end
     end
-end
+})
+
+-- Initialize the library
+OrionLib:Init()
