@@ -1,5 +1,12 @@
 -- Load Orion Library
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
+local success, OrionLib = pcall(function()
+    return loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()
+end)
+
+if not success or not OrionLib then
+    warn("Failed to load Orion Library! Check the URL or your connection.")
+    return
+end
 
 -- Creating the Window
 local Window = OrionLib:MakeWindow({
@@ -29,7 +36,12 @@ PlayerTab:AddSlider({
     Default = 16,
     Increment = 1,
     Callback = function(Value)
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+        local character = game.Players.LocalPlayer.Character
+        if character and character:FindFirstChild("Humanoid") then
+            character.Humanoid.WalkSpeed = Value
+        else
+            warn("Character or Humanoid not found!")
+        end
     end
 })
 
@@ -41,7 +53,12 @@ PlayerTab:AddSlider({
     Default = 50,
     Increment = 1,
     Callback = function(Value)
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+        local character = game.Players.LocalPlayer.Character
+        if character and character:FindFirstChild("Humanoid") then
+            character.Humanoid.JumpPower = Value
+        else
+            warn("Character or Humanoid not found!")
+        end
     end
 })
 
@@ -61,7 +78,12 @@ PlayerTab:AddSlider({
 PlayerTab:AddButton({
     Name = "Teleport to Center",
     Callback = function()
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-1040, 201, 90)
+        local character = game.Players.LocalPlayer.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            character.HumanoidRootPart.CFrame = CFrame.new(-1040, 201, 90)
+        else
+            warn("Character or HumanoidRootPart not found!")
+        end
     end
 })
 
@@ -208,3 +230,4 @@ OtherTab:AddButton({
 
 -- Initialize Orion Library
 OrionLib:Init()
+print("Orion Library initialized successfully!")
