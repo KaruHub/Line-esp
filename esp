@@ -72,6 +72,26 @@ PlayerTab:AddButton({
     end
 })
 
+-- ESP Toggle
+PlayerTab:AddToggle({
+    Name = "Enable ESP",
+    Default = false,
+    Callback = function(State)
+        for _, v in pairs(game.Players:GetPlayers()) do
+            if v ~= game.Players.LocalPlayer then
+                local Billboard = Instance.new("BillboardGui", v.Character.Head)
+                Billboard.Size = UDim2.new(5, 0, 2, 0)
+                Billboard.AlwaysOnTop = true
+                local Text = Instance.new("TextLabel", Billboard)
+                Text.Size = UDim2.new(1, 0, 1, 0)
+                Text.Text = v.Name
+                Text.TextColor3 = Color3.fromRGB(255, 0, 0)
+                Text.BackgroundTransparency = 1
+            end
+        end
+    end
+})
+
 -- Main Tab
 local MainTab = Window:MakeTab({
     Name = "Main",
@@ -116,6 +136,30 @@ MainTab:AddToggle({
                 end
             end
         end
+    end
+})
+
+-- Bridges Tab
+local BridgeTab = Window:MakeTab({
+    Name = "Bridges",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+-- Table of bridges
+local Bridges = {
+    ["Bridge 1"] = Vector3.new(-948, 189, -86),
+    ["Bridge 2"] = Vector3.new(-1040, 201, 150),
+    ["Bridge 3"] = Vector3.new(-1200, 215, 200)
+}
+
+-- Dropdown for Bridge Teleports
+BridgeTab:AddDropdown({
+    Name = "Select a Bridge",
+    Default = "Bridge 1",
+    Options = {"Bridge 1", "Bridge 2", "Bridge 3"},
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Bridges[Value])
     end
 })
 
