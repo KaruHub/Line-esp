@@ -52,6 +52,27 @@ local PlayerSection = PlayerTab:AddSection({
     Name = "Player Settings"
 })
 
+-- No Fall Checkbox
+local part = Instance.new("Part")
+part.Size = Vector3.new(1000, 1, 1000) -- Set a normal height (1) but still make it extremely wide
+part.Position = Vector3.new(-948, 189, -86)  -- Set the position at X = -948, Y = 189, Z = -86
+part.Anchored = true  -- Anchor the part so it doesn't fall
+part.BrickColor = BrickColor.Red()  -- Set the BrickColor to ReallyRed
+part.Material = Enum.Material.ForceField  -- Set the material to ForceField
+part.Reflectance = 1  -- Set the reflectance to 1
+part.Transparency = 0  -- Set transparency to 0 (fully visible)
+part.CanCollide = true  -- Enable collision by default
+part.Parent = game.Workspace  -- Parent the part to Workspace
+
+PlayerTab:AddToggle({
+    Name = "No Fall",
+    Default = false,
+    Callback = function(State)
+        part.Transparency = State and 1 or 0  -- Set transparency to 1 (invisible) or 0 (visible)
+        part.CanCollide = State  -- Enable or disable collision
+    end
+})
+
 -- Get All Items Button
 PlayerTab:AddButton({
     Name = "Get All Items",
