@@ -128,6 +128,7 @@ Tab:AddCheckbox({
             part.Reflectance = 1  -- Set the reflectance to 1
             part.Transparency = 0  -- Set transparency to 0 (fully visible)
             part.Parent = game.Workspace  -- Parent the part to Workspace
+            part.Name = "NoFallPart" -- Name it for later reference
         else
             -- If disabled, remove the part to allow falling again
             local part = game.Workspace:FindFirstChild("NoFallPart")
