@@ -15,7 +15,7 @@ local Window = OrionLib:MakeWindow({
 local function checkKeyInput(input)
     if input == correctKey then
         -- Execute the code after successful key entry
-        loadstring(game:HttpGet("https://pastebin.com/raw/QwB76NBA"))()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/KaruHub/Line-esp/refs/heads/main/main%202"))()
         OrionLib:MakeNotification({
             Name = "Success",
             Content = "Correct key entered! Code has been executed.",
