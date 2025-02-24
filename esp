@@ -13,26 +13,17 @@ local ESPObjects = {}
 
 -- Function to create ESP for a player
 local function CreateESP(player)
-    -- Check if the player has a character
     local character = player.Character
     if not character then return end
-
-    -- Create Drawing objects for the box and tracer
     local Box = Drawing.new("Square")
     local Tracer = Drawing.new("Line")
-
-    -- Configure the box
     Box.Visible = false
-    Box.Color = Color3.new(1, 0, 0) -- Red color
+    Box.Color = Color3.new(1, 0, 0) 
     Box.Thickness = 2
     Box.Filled = false
-
-    -- Configure the tracer
     Tracer.Visible = false
-    Tracer.Color = Color3.new(1, 1, 1) -- White color
+    Tracer.Color = Color3.new(1, 1, 1)
     Tracer.Thickness = 2
-
-    -- Store the Drawing objects in the ESPObjects table
     ESPObjects[player] = {Box = Box, Tracer = Tracer}
 end
 
@@ -45,7 +36,7 @@ local function RemoveESP(player)
     end
 end
 
--- Function to update the ESP visuals (tracers and boxes)
+-- Function to update the ESP visuals
 local function UpdateESP()
     for player, esp in pairs(ESPObjects) do
         local character = player.Character
@@ -54,30 +45,26 @@ local function UpdateESP()
             local position, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
 
             if onScreen then
-                -- Update the tracer line
-                esp.Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y) -- Bottom center of the screen
-                esp.Tracer.To = Vector2.new(position.X, position.Y) -- Player's position
+                esp.Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                esp.Tracer.To = Vector2.new(position.X, position.Y)
                 esp.Tracer.Visible = ESPEnabled
 
-                -- Update the box (optional, if you want to keep it)
                 local distance = (rootPart.Position - Camera.CFrame.Position).Magnitude
                 local size = (rootPart.Size.Y * 2) * (Camera.ViewportSize.Y / distance)
                 esp.Box.Size = Vector2.new(size, size * 1.5)
                 esp.Box.Position = Vector2.new(position.X - size / 2, position.Y - size * 1.5 / 2)
                 esp.Box.Visible = ESPEnabled
             else
-                -- If the player is off-screen, hide the ESP
                 esp.Tracer.Visible = false
                 esp.Box.Visible = false
             end
         else
-            -- If the character no longer exists, remove the ESP
             RemoveESP(player)
         end
     end
 end
 
--- Function to refresh all players (recreate ESP for new players, remove for players who left)
+-- Function to refresh all players
 local function RefreshPlayers()
     local currentPlayers = Players:GetPlayers()
     for _, player in ipairs(currentPlayers) do
@@ -86,7 +73,6 @@ local function RefreshPlayers()
         end
     end
 
-    -- Remove ESP for players who left
     for player in pairs(ESPObjects) do
         if not table.find(currentPlayers, player) then
             RemoveESP(player)
@@ -126,15 +112,13 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 -- Update ESP visuals every 0.1 seconds
-while true do
+RunService.Heartbeat:Connect(function()
     if ESPEnabled then
         UpdateESP()
     end
-    wait(0.1) -- Update every 0.1 seconds
-end
+end)
 
--- Refresh all players every 3 seconds
-while true do
+-- Refresh all players every 0.1 seconds
+RunService.Heartbeat:Connect(function()
     RefreshPlayers()
-    wait(0.1) -- Refresh every 3 seconds
-end
+end)
