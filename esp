@@ -34,10 +34,10 @@ end
 
 -- Create Orion UI Window
 local Window = OrionLib:MakeWindow({
-    Name = "Bridge Teleporter & ESP",
+    Name = "Karu Blocks Hub",
     HidePremium = false,
     SaveConfig = true,
-    ConfigFolder = "OrionBridgeTP"
+    ConfigFolder = "KaruBlocksHub"
 })
 
 -- Player Tab
@@ -64,12 +64,14 @@ part.Transparency = 1  -- Set transparency to 1 (invisible) by default
 part.CanCollide = false  -- Disable collision by default
 part.Parent = game.Workspace  -- Parent the part to Workspace
 
+local noFallEnabled = false
 PlayerTab:AddToggle({
     Name = "No Fall",
     Default = false,
     Callback = function(State)
-        part.Transparency = State and 0 or 1  -- Set transparency to 0 (visible) or 1 (invisible)
-        part.CanCollide = State  -- Enable or disable collision
+        noFallEnabled = State
+        part.Transparency = noFallEnabled and 0 or 1  -- Set transparency to 0 (visible) or 1 (invisible)
+        part.CanCollide = noFallEnabled  -- Enable or disable collision
     end
 })
 
@@ -162,7 +164,9 @@ local function createESP(player)
     if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local rootPart = player.Character.HumanoidRootPart
         local highlight = rootPart:FindFirstChild("Highlight")
+        local billboard = rootPart:FindFirstChild("BillboardGui")
 
+        -- Create highlight
         if not highlight then
             highlight = Instance.new("BoxHandleAdornment", rootPart)
             highlight.Name = "Highlight"
@@ -175,6 +179,25 @@ local function createESP(player)
         else
             highlight.Color3 = espColor
         end
+
+        -- Create nametag
+        if not billboard then
+            billboard = Instance.new("BillboardGui", rootPart)
+            billboard.Name = "BillboardGui"
+            billboard.Size = UDim2.new(0, 200, 0, 50)
+            billboard.AlwaysOnTop = true
+            billboard.StudsOffset = Vector3.new(0, 2, 0)
+
+            local text = Instance.new("TextLabel", billboard)
+            text.Name = "Nametag"
+            text.Text = player.Name
+            text.TextColor3 = espColor
+            text.TextSize = 20
+            text.BackgroundTransparency = 1
+            text.Size = UDim2.new(1, 0, 1, 0)
+        else
+            billboard.TextLabel.TextColor3 = espColor
+        end
     end
 end
 
@@ -182,8 +205,13 @@ local function removeESP(player)
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local rootPart = player.Character.HumanoidRootPart
         local highlight = rootPart:FindFirstChild("Highlight")
+        local billboard = rootPart:FindFirstChild("BillboardGui")
+
         if highlight then
             highlight:Destroy()
+        end
+        if billboard then
+            billboard:Destroy()
         end
     end
 end
@@ -274,4 +302,4 @@ OtherTab:AddButton({
 
 -- Initialize Orion Library
 OrionLib:Init()
-print("Orion Library initialized successfully!")
+print("Karu Blocks Hub initialized successfully!")
