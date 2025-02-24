@@ -1,14 +1,7 @@
 -- Load Orion Library
-local success, OrionLib = pcall(function()
-    return loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()
-end)
+local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
 
-if not success or not OrionLib then
-    warn("Failed to load Orion Library! Check the URL or your connection.")
-    return
-end
-
--- Creating the Window
+-- Create a Window
 local Window = OrionLib:MakeWindow({
     Name = "Bridge Teleporter & ESP",
     HidePremium = false,
