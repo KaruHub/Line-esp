@@ -65,35 +65,48 @@ PlayerTab:AddButton({
     end
 })
 
--- ESP Toggle & Color Picker
+-- ESP System
 local espEnabled = false
 local espColor = Color3.fromRGB(255, 0, 0)
+local espRefreshRate = 3 -- Refresh every 3 seconds
+
+local function createESP(player)
+    if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+        local head = player.Character.Head
+        local billboard = head:FindFirstChild("BillboardGui")
+
+        if not billboard then
+            billboard = Instance.new("BillboardGui", head)
+            billboard.Size = UDim2.new(5, 0, 2, 0)
+            billboard.AlwaysOnTop = true
+
+            local text = Instance.new("TextLabel", billboard)
+            text.Size = UDim2.new(1, 0, 1, 0)
+            text.Text = player.Name
+            text.TextColor3 = espColor
+            text.BackgroundTransparency = 1
+        else
+            billboard.TextLabel.TextColor3 = espColor
+        end
+    end
+end
+
+local function removeESP(player)
+    if player.Character and player.Character:FindFirstChild("Head") then
+        local head = player.Character.Head
+        local billboard = head:FindFirstChild("BillboardGui")
+        if billboard then
+            billboard:Destroy()
+        end
+    end
+end
 
 local function updateESP()
     for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-            local head = player.Character.Head
-            local billboard = head:FindFirstChild("BillboardGui")
-            
-            if espEnabled then
-                if not billboard then
-                    billboard = Instance.new("BillboardGui", head)
-                    billboard.Size = UDim2.new(5, 0, 2, 0)
-                    billboard.AlwaysOnTop = true
-                    
-                    local text = Instance.new("TextLabel", billboard)
-                    text.Size = UDim2.new(1, 0, 1, 0)
-                    text.Text = player.Name
-                    text.TextColor3 = espColor
-                    text.BackgroundTransparency = 1
-                else
-                    billboard.TextLabel.TextColor3 = espColor
-                end
-            else
-                if billboard then
-                    billboard:Destroy()
-                end
-            end
+        if espEnabled then
+            createESP(player)
+        else
+            removeESP(player)
         end
     end
 end
@@ -103,7 +116,15 @@ PlayerTab:AddToggle({
     Default = false,
     Callback = function(State)
         espEnabled = State
-        updateESP()
+        if espEnabled then
+            updateESP()
+            while espEnabled do
+                wait(espRefreshRate)
+                updateESP()
+            end
+        else
+            updateESP()
+        end
     end
 })
 
@@ -118,10 +139,7 @@ PlayerTab:AddColorpicker({
     end
 })
 
--- Bridges Table
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-
+-- Bridge Teleportation
 local bridges = {
     BlueBridge = game.Workspace:FindFirstChild("BlueBridge"),
     CyanBridge = game.Workspace:FindFirstChild("CyanBridge"),
@@ -136,7 +154,12 @@ local bridges = {
 local function teleportToBridge(bridgeName)
     local bridge = bridges[bridgeName]
     if bridge and bridge.PrimaryPart then
-        character:SetPrimaryPartCFrame(bridge.PrimaryPart.CFrame)
+        local character = game.Players.LocalPlayer.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            character.HumanoidRootPart.CFrame = bridge.PrimaryPart.CFrame
+        else
+            warn("Character or HumanoidRootPart not found!")
+        end
     else
         warn("Bridge not found or missing PrimaryPart: " .. tostring(bridgeName))
     end
