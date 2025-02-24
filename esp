@@ -52,6 +52,27 @@ local PlayerSection = PlayerTab:AddSection({
     Name = "Player Settings"
 })
 
+-- Get All Items Button
+PlayerTab:AddButton({
+    Name = "Get All Items",
+    Callback = function()
+        local remoteEvent = game.ReplicatedStorage:WaitForChild("SpawnGalaxyBlock") -- Adjust to where your RemoteEvent is located
+
+        local function fireRemoteEvent()
+            local duration = 3 -- Duration in seconds
+            local interval = 0.001 -- Interval in seconds
+
+            local endTime = tick() + duration
+            while tick() < endTime do
+                remoteEvent:FireServer()
+                wait(interval)
+            end
+        end
+
+        fireRemoteEvent()
+    end
+})
+
 -- WalkSpeed Slider
 PlayerTab:AddSlider({
     Name = "WalkSpeed",
@@ -117,32 +138,31 @@ local espColor = Color3.fromRGB(255, 0, 0)
 local espRefreshRate = 3 -- Refresh every 3 seconds
 
 local function createESP(player)
-    if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-        local head = player.Character.Head
-        local billboard = head:FindFirstChild("BillboardGui")
+    if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local rootPart = player.Character.HumanoidRootPart
+        local highlight = rootPart:FindFirstChild("Highlight")
 
-        if not billboard then
-            billboard = Instance.new("BillboardGui", head)
-            billboard.Size = UDim2.new(5, 0, 2, 0)
-            billboard.AlwaysOnTop = true
-
-            local text = Instance.new("TextLabel", billboard)
-            text.Size = UDim2.new(1, 0, 1, 0)
-            text.Text = player.Name
-            text.TextColor3 = espColor
-            text.BackgroundTransparency = 1
+        if not highlight then
+            highlight = Instance.new("BoxHandleAdornment", rootPart)
+            highlight.Name = "Highlight"
+            highlight.Size = Vector3.new(4, 6, 4)
+            highlight.Transparency = 0.5
+            highlight.AlwaysOnTop = true
+            highlight.ZIndex = 10
+            highlight.Adornee = rootPart
+            highlight.Color3 = espColor
         else
-            billboard.TextLabel.TextColor3 = espColor
+            highlight.Color3 = espColor
         end
     end
 end
 
 local function removeESP(player)
-    if player.Character and player.Character:FindFirstChild("Head") then
-        local head = player.Character.Head
-        local billboard = head:FindFirstChild("BillboardGui")
-        if billboard then
-            billboard:Destroy()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local rootPart = player.Character.HumanoidRootPart
+        local highlight = rootPart:FindFirstChild("Highlight")
+        if highlight then
+            highlight:Destroy()
         end
     end
 end
