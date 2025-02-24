@@ -45,7 +45,7 @@ local function RemoveESP(player)
     end
 end
 
--- Function to update the ESP visuals
+-- Function to update the ESP visuals (tracers and boxes)
 local function UpdateESP()
     for player, esp in pairs(ESPObjects) do
         local character = player.Character
@@ -54,23 +54,21 @@ local function UpdateESP()
             local position, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
 
             if onScreen then
-                -- Calculate the size of the box based on the player's distance from the camera
-                local distance = (rootPart.Position - Camera.CFrame.Position).Magnitude
-                local size = (rootPart.Size.Y * 2) * (Camera.ViewportSize.Y / distance)
-
-                -- Update the box
-                esp.Box.Size = Vector2.new(size, size * 1.5)
-                esp.Box.Position = Vector2.new(position.X - size / 2, position.Y - size * 1.5 / 2)
-                esp.Box.Visible = ESPEnabled
-
-                -- Update the tracer
+                -- Update the tracer line
                 esp.Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y) -- Bottom center of the screen
                 esp.Tracer.To = Vector2.new(position.X, position.Y) -- Player's position
                 esp.Tracer.Visible = ESPEnabled
+
+                -- Update the box (optional, if you want to keep it)
+                local distance = (rootPart.Position - Camera.CFrame.Position).Magnitude
+                local size = (rootPart.Size.Y * 2) * (Camera.ViewportSize.Y / distance)
+                esp.Box.Size = Vector2.new(size, size * 1.5)
+                esp.Box.Position = Vector2.new(position.X - size / 2, position.Y - size * 1.5 / 2)
+                esp.Box.Visible = ESPEnabled
             else
                 -- If the player is off-screen, hide the ESP
-                esp.Box.Visible = false
                 esp.Tracer.Visible = false
+                esp.Box.Visible = false
             end
         else
             -- If the character no longer exists, remove the ESP
@@ -102,8 +100,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.E then
         ESPEnabled = not ESPEnabled
         for _, esp in pairs(ESPObjects) do
-            esp.Box.Visible = ESPEnabled
             esp.Tracer.Visible = ESPEnabled
+            esp.Box.Visible = ESPEnabled
         end
     end
 end)
