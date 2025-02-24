@@ -1,14 +1,5 @@
---$$$$$$$\                       $$\                           $$\                     $$\       $$$$$$$$\                                       $$$$$$\  $$\       $$\       $$\           $$\ 
---$$  __$$\                      $$ |                          $$ |                    $$ |      $$  _____|                                     $$  __$$\ $$ |      \__|      $$ |          $$ |
---$$ |  $$ | $$$$$$\   $$$$$$\ $$$$$$\    $$$$$$\   $$$$$$$\ $$$$$$\    $$$$$$\   $$$$$$$ |      $$ |    $$$$$$\   $$$$$$\  $$$$$$\$$$$\        $$ /  \__|$$ |  $$\ $$\  $$$$$$$ | $$$$$$$\ $$ |
---$$$$$$$  |$$  __$$\ $$  __$$\\_$$  _|  $$  __$$\ $$  _____|\_$$  _|  $$  __$$\ $$  __$$ |      $$$$$\ $$  __$$\ $$  __$$\ $$  _$$  _$$\       \$$$$$$\  $$ | $$  |$$ |$$  __$$ |$$  _____|$$ |
---$$  ____/ $$ |  \__|$$ /  $$ | $$ |    $$$$$$$$ |$$ /        $$ |    $$$$$$$$ |$$ /  $$ |      $$  __|$$ |  \__|$$ /  $$ |$$ / $$ / $$ |       \____$$\ $$$$$$  / $$ |$$ /  $$ |\$$$$$$\  \__|
---$$ |      $$ |      $$ |  $$ | $$ |$$\ $$   ____|$$ |        $$ |$$\ $$   ____|$$ |  $$ |      $$ |   $$ |      $$ |  $$ |$$ | $$ | $$ |      $$\   $$ |$$  _$$<  $$ |$$ |  $$ | \____$$\     
---$$ |      $$ |      \$$$$$$  | \$$$$  |\$$$$$$$\ \$$$$$$$\   \$$$$  |\$$$$$$$\ \$$$$$$$ |      $$ |   $$ |      \$$$$$$  |$$ | $$ | $$ |      \$$$$$$  |$$ | \$$\ $$ |\$$$$$$$ |$$$$$$$  |$$\ 
---\__|      \__|       \______/   \____/  \_______| \_______|   \____/  \_______| \_______|      \__|   \__|       \______/ \__| \__| \__|       \______/ \__|  \__|\__| \_______|\_______/ \__|
-
 -- Load the latest version of the Orion library
-local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
+local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 
 local correctKey = "Karu!Blocks100"
 local keyLink = "https://loot-link.com/s?LqUQ7P4l"  -- The key link
@@ -23,8 +14,15 @@ local Window = OrionLib:MakeWindow({
 -- Key input function
 local function checkKeyInput(input)
     if input == correctKey then
-        -- Execute the correct loadstring
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/KaruHub/Line-esp/refs/heads/main/esp"))()
+        print("Correct key entered, attempting to load script...")
+        local success, err = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/KaruHub/Line-esp/refs/heads/main/esp"))()
+        end)
+        if not success then
+            print("Error executing script:", err)
+        else
+            print("Script executed successfully!")
+        end
         OrionLib:MakeNotification({
             Name = "Success",
             Content = "Correct key entered! Code has been executed.",
@@ -32,7 +30,6 @@ local function checkKeyInput(input)
             Time = 3
         })
     else
-        -- Notify user if the key is incorrect
         OrionLib:MakeNotification({
             Name = "Error",
             Content = "Incorrect key entered. Please try again.",
