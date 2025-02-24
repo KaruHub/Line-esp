@@ -186,12 +186,17 @@ PlayerTab:AddColorpicker({
 })
 
 -- Bridges Dropdown
+local teleportOnSelect = false -- Prevents teleportation on script load
 PlayerTab:AddDropdown({
     Name = "Select a Bridge",
     Default = "BlueBridge",
     Options = {"BlueBridge", "CyanBridge", "GreenBridge", "OrangeBridge", "PinkBridge", "PurpleBridge", "RedBridge", "YellowBridge"},
     Callback = function(Value)
-        teleportToBridge(Value)
+        if teleportOnSelect then
+            teleportToBridge(Value)
+        else
+            teleportOnSelect = true -- Enable teleportation after the first selection
+        end
     end
 })
 
