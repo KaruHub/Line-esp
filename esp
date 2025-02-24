@@ -230,4 +230,3 @@ OtherTab:AddButton({
 
 -- Initialize Orion Library
 OrionLib:Init()
-print("Orion Library initialized successfully!")
