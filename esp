@@ -64,14 +64,6 @@ PlayerTab:AddButton({
     end
 })
 
--- Teleport to Bridge Button
-PlayerTab:AddButton({
-    Name = "Teleport to Bridge",
-    Callback = function()
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-948, 189, -86)
-    end
-})
-
 -- ESP Toggle & Color Picker
 local espEnabled = false
 local espColor = Color3.fromRGB(255, 0, 0)
@@ -112,74 +104,49 @@ PlayerTab:AddColorpicker({
     end
 })
 
--- Main Tab
-local MainTab = Window:MakeTab({
-    Name = "Main",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+-- Bridges Table (Using Your Exact Script)
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
 
--- Get All Items Button
-MainTab:AddButton({
-    Name = "Get All Items",
-    Callback = function()
-        local remoteEvent = game.ReplicatedStorage:WaitForChild("SpawnGalaxyBlock")
-        local duration = 3
-        local interval = 0.001
-        local endTime = tick() + duration
-        while tick() < endTime do
-            remoteEvent:FireServer()
-            wait(interval)
-        end
-    end
-})
-
--- No Fall Toggle
-MainTab:AddToggle({
-    Name = "No Fall",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            local part = Instance.new("Part")
-            part.Size = Vector3.new(1000, 1, 1000)
-            part.Position = Vector3.new(-948, 189, -86)
-            part.Anchored = true
-            part.BrickColor = BrickColor.Red()
-            part.Material = Enum.Material.ForceField
-            part.Reflectance = 1
-            part.Transparency = 0
-            part.Parent = game.Workspace
-        else
-            for _, v in pairs(game.Workspace:GetChildren()) do
-                if v:IsA("Part") and v.Size == Vector3.new(1000, 1, 1000) then
-                    v:Destroy()
-                end
-            end
-        end
-    end
-})
-
--- Bridges Tab
-local BridgeTab = Window:MakeTab({
-    Name = "Bridges",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
--- Table of bridges
-local Bridges = {
-    ["Bridge 1"] = Vector3.new(-948, 189, -86),
-    ["Bridge 2"] = Vector3.new(-1040, 201, 150),
-    ["Bridge 3"] = Vector3.new(-1200, 215, 200)
+local bridges = {
+    BlueBridge = game.Workspace:FindFirstChild("BlueBridge"),
+    CyanBridge = game.Workspace:FindFirstChild("CyanBridge"),
+    GreenBridge = game.Workspace:FindFirstChild("GreenBridge"),
+    OrangeBridge = game.Workspace:FindFirstChild("OrangeBridge"),
+    PinkBridge = game.Workspace:FindFirstChild("PinkBridge"),
+    PurpleBridge = game.Workspace:FindFirstChild("PurpleBridge"),
+    RedBridge = game.Workspace:FindFirstChild("RedBridge"),
+    YellowBridge = game.Workspace:FindFirstChild("YellowBridge")
 }
 
--- Dropdown for Bridge Teleports
-BridgeTab:AddDropdown({
+local function teleportToBridge(bridgeName)
+    local bridge = bridges[bridgeName]
+    if bridge and bridge.PrimaryPart then
+        character:SetPrimaryPartCFrame(bridge.PrimaryPart.CFrame)
+    else
+        warn("Bridge not found or missing PrimaryPart: " .. tostring(bridgeName))
+    end
+end
+
+-- Bridges Dropdown
+PlayerTab:AddDropdown({
     Name = "Select a Bridge",
-    Default = "Bridge 1",
-    Options = {"Bridge 1", "Bridge 2", "Bridge 3"},
+    Default = "BlueBridge",
+    Options = {"BlueBridge", "CyanBridge", "GreenBridge", "OrangeBridge", "PinkBridge", "PurpleBridge", "RedBridge", "YellowBridge"},
     Callback = function(Value)
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Bridges[Value])
+        teleportToBridge(Value)
+    end
+})
+
+-- Get All Items Button (Re-Added)
+PlayerTab:AddButton({
+    Name = "Get All Items",
+    Callback = function()
+        for _, item in pairs(game.Workspace:GetChildren()) do
+            if item:IsA("Tool") then
+                item:Clone().Parent = game.Players.LocalPlayer.Backpack
+            end
+        end
     end
 })
 
