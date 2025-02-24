@@ -1,4 +1,5 @@
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
+-- Load Orion Library
+local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()
 
 -- Creating the Window
 local Window = OrionLib:MakeWindow({
@@ -68,31 +69,41 @@ PlayerTab:AddButton({
 local espEnabled = false
 local espColor = Color3.fromRGB(255, 0, 0)
 
+local function updateESP()
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            local head = player.Character.Head
+            local billboard = head:FindFirstChild("BillboardGui")
+            
+            if espEnabled then
+                if not billboard then
+                    billboard = Instance.new("BillboardGui", head)
+                    billboard.Size = UDim2.new(5, 0, 2, 0)
+                    billboard.AlwaysOnTop = true
+                    
+                    local text = Instance.new("TextLabel", billboard)
+                    text.Size = UDim2.new(1, 0, 1, 0)
+                    text.Text = player.Name
+                    text.TextColor3 = espColor
+                    text.BackgroundTransparency = 1
+                else
+                    billboard.TextLabel.TextColor3 = espColor
+                end
+            else
+                if billboard then
+                    billboard:Destroy()
+                end
+            end
+        end
+    end
+end
+
 PlayerTab:AddToggle({
     Name = "Enable ESP",
     Default = false,
     Callback = function(State)
         espEnabled = State
-        for _, v in pairs(game.Players:GetPlayers()) do
-            if v ~= game.Players.LocalPlayer then
-                if espEnabled then
-                    local Billboard = Instance.new("BillboardGui", v.Character.Head)
-                    Billboard.Size = UDim2.new(5, 0, 2, 0)
-                    Billboard.AlwaysOnTop = true
-                    local Text = Instance.new("TextLabel", Billboard)
-                    Text.Size = UDim2.new(1, 0, 1, 0)
-                    Text.Text = v.Name
-                    Text.TextColor3 = espColor
-                    Text.BackgroundTransparency = 1
-                else
-                    for _, gui in pairs(v.Character.Head:GetChildren()) do
-                        if gui:IsA("BillboardGui") then
-                            gui:Destroy()
-                        end
-                    end
-                end
-            end
-        end
+        updateESP()
     end
 })
 
@@ -101,10 +112,13 @@ PlayerTab:AddColorpicker({
     Default = Color3.fromRGB(255, 0, 0),
     Callback = function(Value)
         espColor = Value
+        if espEnabled then
+            updateESP()
+        end
     end
 })
 
--- Bridges Table (Using Your Exact Script)
+-- Bridges Table
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 
@@ -135,18 +149,6 @@ PlayerTab:AddDropdown({
     Options = {"BlueBridge", "CyanBridge", "GreenBridge", "OrangeBridge", "PinkBridge", "PurpleBridge", "RedBridge", "YellowBridge"},
     Callback = function(Value)
         teleportToBridge(Value)
-    end
-})
-
--- Get All Items Button (Re-Added)
-PlayerTab:AddButton({
-    Name = "Get All Items",
-    Callback = function()
-        for _, item in pairs(game.Workspace:GetChildren()) do
-            if item:IsA("Tool") then
-                item:Clone().Parent = game.Players.LocalPlayer.Backpack
-            end
-        end
     end
 })
 
