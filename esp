@@ -145,27 +145,18 @@ MainTab:AddToggle({
     end
 })
 
--- Create a Teleport Section
-local TeleportSection = MainTab:AddSection({
+-- Create a Teleport Section in Player Tab
+local TeleportSection = PlayerTab:AddSection({
     Name = "Teleport"
 })
 
--- Bridge Teleport Dropdown
-local bridgeNames = {"BlueBridge", "CyanBridge", "GreenBridge", "OrangeBridge", "PinkBridge", "PurpleBridge", "RedBridge", "YellowBridge"}
-
-MainTab:AddDropdown({
-    Name = "Select Bridge",
-    Default = bridgeNames[1],  -- Default bridge
-    Options = bridgeNames,
-    Callback = function(selectedBridge)
-        -- Teleport to the selected bridge
-        local bridgeModel = game.Workspace:FindFirstChild(selectedBridge)
-        if bridgeModel then
-            local bridgePosition = bridgeModel.PrimaryPart and bridgeModel.PrimaryPart.Position or bridgeModel:GetModelCFrame().Position
-            game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(bridgePosition))
-        else
-            warn(selectedBridge .. " not found in Workspace!")
-        end
+-- Teleport to Center Button
+PlayerTab:AddButton({
+    Name = "Teleport to Center",
+    Callback = function()
+        -- Teleport the player to the center (coordinates: x: -1040, y: 201, z: 90)
+        local targetPosition = Vector3.new(-1040, 201, 90)
+        game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition))
     end
 })
 
