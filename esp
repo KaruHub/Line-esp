@@ -145,9 +145,33 @@ MainTab:AddToggle({
     end
 })
 
--- Create a Teleport Section in Player Tab
+-- Create a Player Tab for Teleport
 local TeleportSection = PlayerTab:AddSection({
     Name = "Teleport"
+})
+
+-- Bridge Names List
+local bridgeNames = {"BlueBridge", "CyanBridge", "GreenBridge", "OrangeBridge", "PinkBridge", "PurpleBridge", "RedBridge", "YellowBridge"}
+
+-- Create the Dropdown for Bridge Teleport
+local BridgeDropdown = PlayerTab:AddDropdown({
+    Name = "Select Bridge",
+    Default = "BlueBridge",
+    Options = bridgeNames,
+    Callback = function(SelectedBridge)
+        local bridgeModel = game.Workspace:FindFirstChild(SelectedBridge)
+        if bridgeModel then
+            local bridgePosition = bridgeModel.PrimaryPart and bridgeModel.PrimaryPart.Position or bridgeModel:GetModelCFrame().Position
+            game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(bridgePosition))
+        else
+            OrionLib:MakeNotification({
+                Name = "Bridge Not Found",
+                Content = "The selected bridge could not be found in the workspace.",
+                Image = "rbxassetid://4483345998",
+                Time = 3
+            })
+        end
+    end
 })
 
 -- Teleport to Center Button
@@ -157,6 +181,37 @@ PlayerTab:AddButton({
         -- Teleport the player to the center (coordinates: x: -1040, y: 201, z: 90)
         local targetPosition = Vector3.new(-1040, 201, 90)
         game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition))
+    end
+})
+
+-- Create an "Other" Tab
+local otherTab = Window:MakeTab({
+    Name = "Other",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+-- Infinite Yield Button
+otherTab:AddButton({
+    Name = "Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+    end
+})
+
+-- Dex Explorer Button
+otherTab:AddButton({
+    Name = "Dex Explorer",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Keyless-mobile-dex-17888"))()
+    end
+})
+
+-- SimpleSpy Button
+otherTab:AddButton({
+    Name = "SimpleSpy",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpySource.lua"))()
     end
 })
 
