@@ -130,7 +130,7 @@ while true do
     if ESPEnabled then
         UpdateESP()
     end
-    wait(3) -- Update every 0.1 seconds
+    wait(0.1) -- Update every 0.1 seconds
 end
 
 -- Refresh all players every 3 seconds
