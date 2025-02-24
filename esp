@@ -72,23 +72,43 @@ PlayerTab:AddButton({
     end
 })
 
--- ESP Toggle
+-- ESP Toggle & Color Picker
+local espEnabled = false
+local espColor = Color3.fromRGB(255, 0, 0)
+
 PlayerTab:AddToggle({
     Name = "Enable ESP",
     Default = false,
     Callback = function(State)
+        espEnabled = State
         for _, v in pairs(game.Players:GetPlayers()) do
             if v ~= game.Players.LocalPlayer then
-                local Billboard = Instance.new("BillboardGui", v.Character.Head)
-                Billboard.Size = UDim2.new(5, 0, 2, 0)
-                Billboard.AlwaysOnTop = true
-                local Text = Instance.new("TextLabel", Billboard)
-                Text.Size = UDim2.new(1, 0, 1, 0)
-                Text.Text = v.Name
-                Text.TextColor3 = Color3.fromRGB(255, 0, 0)
-                Text.BackgroundTransparency = 1
+                if espEnabled then
+                    local Billboard = Instance.new("BillboardGui", v.Character.Head)
+                    Billboard.Size = UDim2.new(5, 0, 2, 0)
+                    Billboard.AlwaysOnTop = true
+                    local Text = Instance.new("TextLabel", Billboard)
+                    Text.Size = UDim2.new(1, 0, 1, 0)
+                    Text.Text = v.Name
+                    Text.TextColor3 = espColor
+                    Text.BackgroundTransparency = 1
+                else
+                    for _, gui in pairs(v.Character.Head:GetChildren()) do
+                        if gui:IsA("BillboardGui") then
+                            gui:Destroy()
+                        end
+                    end
+                end
             end
         end
+    end
+})
+
+PlayerTab:AddColorpicker({
+    Name = "ESP Color",
+    Default = Color3.fromRGB(255, 0, 0),
+    Callback = function(Value)
+        espColor = Value
     end
 })
 
