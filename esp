@@ -8,95 +8,75 @@ local Window = OrionLib:MakeWindow({
     ConfigFolder = "OrionTest"
 })
 
--- Create a Player tab
+-- Player Tab
 local PlayerTab = Window:MakeTab({
     Name = "Player",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
--- Create a section in the Player Tab for ESP
-local ESPSection = PlayerTab:AddSection({
-    Name = "ESP Settings"
+-- Player Section
+local PlayerSection = PlayerTab:AddSection({
+    Name = "Player Settings"
 })
 
--- ESP functionality
-local espEnabled = false
-local espObjects = {}
-local highlightColor = Color3.fromRGB(255, 0, 0)  -- Default red color for ESP
-
--- Function to create ESP
-local function createESP(player)
-    local character = player.Character
-    if not character then return end
-    local highlight = Instance.new("Highlight")
-    highlight.FillColor, highlight.OutlineColor = highlightColor, highlightColor
-    highlight.Parent = character
-    local billboard = Instance.new("BillboardGui")
-    billboard.Adornee = character:FindFirstChild("Head") or character:FindFirstChild("HumanoidRootPart")
-    billboard.Size, billboard.StudsOffset = UDim2.new(0, 200, 0, 50), Vector3.new(0, 2, 0)
-    billboard.AlwaysOnTop = true
-    local nametag = Instance.new("TextLabel")
-    nametag.Text, nametag.TextColor3 = player.Name, highlightColor
-    nametag.Size, nametag.BackgroundTransparency = UDim2.new(1, 0, 1, 0), 1
-    nametag.Parent = billboard
-    billboard.Parent = character
-    espObjects[player] = {highlight, billboard}
-end
-
--- Function to remove ESP
-local function removeESP(player)
-    if espObjects[player] then
-        for _, obj in pairs(espObjects[player]) do obj:Destroy() end
-        espObjects[player] = nil
-    end
-end
-
--- Toggle ESP button
-PlayerTab:AddToggle({
-    Name = "Enable ESP",
-    Default = false,
+-- WalkSpeed Slider
+PlayerTab:AddSlider({
+    Name = "WalkSpeed",
+    Min = 16,
+    Max = 1000,
+    Default = 16,
+    Increment = 1,
     Callback = function(Value)
-        espEnabled = Value
-        if espEnabled then
-            for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= game.Players.LocalPlayer then
-                    createESP(player)
-                end
-            end
-        else
-            for _, player in pairs(game.Players:GetPlayers()) do
-                removeESP(player)
-            end
-        end
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
     end
 })
 
--- ESP Color Picker
-PlayerTab:AddColorpicker({
-    Name = "ESP Color",
-    Default = Color3.fromRGB(255, 0, 0),
+-- JumpPower Slider
+PlayerTab:AddSlider({
+    Name = "JumpPower",
+    Min = 50,
+    Max = 1000,
+    Default = 50,
+    Increment = 1,
     Callback = function(Value)
-        highlightColor = Value
-        if espEnabled then
-            for player, _ in pairs(espObjects) do
-                removeESP(player)
-                createESP(player)
-            end
-        end
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
     end
 })
 
--- Create a Main Tab
+-- Camera Max Zoom Distance Slider
+PlayerTab:AddSlider({
+    Name = "Max Zoom Distance",
+    Min = 10,
+    Max = 50000,
+    Default = 400,
+    Increment = 50,
+    Callback = function(Value)
+        game.Players.LocalPlayer.CameraMaxZoomDistance = Value
+    end
+})
+
+-- Teleport to Center Button
+PlayerTab:AddButton({
+    Name = "Teleport to Center",
+    Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-1040, 201, 90)
+    end
+})
+
+-- Teleport to Bridge Button
+PlayerTab:AddButton({
+    Name = "Teleport to Bridge",
+    Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-948, 189, -86)
+    end
+})
+
+-- Main Tab
 local MainTab = Window:MakeTab({
     Name = "Main",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
-})
-
--- Main Section
-local MainSection = MainTab:AddSection({
-    Name = "Main Actions"
 })
 
 -- Get All Items Button
@@ -104,29 +84,22 @@ MainTab:AddButton({
     Name = "Get All Items",
     Callback = function()
         local remoteEvent = game.ReplicatedStorage:WaitForChild("SpawnGalaxyBlock")
-
-        local function fireRemoteEvent()
-            local duration = 3 -- Duration in seconds
-            local interval = 0.001 -- Interval in seconds
-
-            local endTime = tick() + duration
-            while tick() < endTime do
-                remoteEvent:FireServer()
-                wait(interval)
-            end
+        local duration = 3
+        local interval = 0.001
+        local endTime = tick() + duration
+        while tick() < endTime do
+            remoteEvent:FireServer()
+            wait(interval)
         end
-
-        fireRemoteEvent()
     end
 })
 
--- No Fall Toggle (Checkbox)
+-- No Fall Toggle
 MainTab:AddToggle({
-    Name = "Enable No Fall",
+    Name = "No Fall",
     Default = false,
     Callback = function(Value)
         if Value then
-            -- Create the part for No Fall protection
             local part = Instance.new("Part")
             part.Size = Vector3.new(1000, 1, 1000)
             part.Position = Vector3.new(-948, 189, -86)
@@ -136,63 +109,25 @@ MainTab:AddToggle({
             part.Reflectance = 1
             part.Transparency = 0
             part.Parent = game.Workspace
-            part.Name = "NoFallPart"
         else
-            -- Remove No Fall protection part
-            local part = game.Workspace:FindFirstChild("NoFallPart")
-            if part then part:Destroy() end
+            for _, v in pairs(game.Workspace:GetChildren()) do
+                if v:IsA("Part") and v.Size == Vector3.new(1000, 1, 1000) then
+                    v:Destroy()
+                end
+            end
         end
     end
 })
 
--- Create a Player Tab for Teleport
-local TeleportSection = PlayerTab:AddSection({
-    Name = "Teleport"
-})
-
--- Bridge Names List
-local bridgeNames = {"BlueBridge", "CyanBridge", "GreenBridge", "OrangeBridge", "PinkBridge", "PurpleBridge", "RedBridge", "YellowBridge"}
-
--- Create the Dropdown for Bridge Teleport
-local BridgeDropdown = PlayerTab:AddDropdown({
-    Name = "Select Bridge",
-    Default = "BlueBridge",
-    Options = bridgeNames,
-    Callback = function(SelectedBridge)
-        local bridgeModel = game.Workspace:FindFirstChild(SelectedBridge)
-        if bridgeModel then
-            local bridgePosition = bridgeModel.PrimaryPart and bridgeModel.PrimaryPart.Position or bridgeModel:GetModelCFrame().Position
-            game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(bridgePosition))
-        else
-            OrionLib:MakeNotification({
-                Name = "Bridge Not Found",
-                Content = "The selected bridge could not be found in the workspace.",
-                Image = "rbxassetid://4483345998",
-                Time = 3
-            })
-        end
-    end
-})
-
--- Teleport to Center Button
-PlayerTab:AddButton({
-    Name = "Teleport to Center",
-    Callback = function()
-        -- Teleport the player to the center (coordinates: x: -1040, y: 201, z: 90)
-        local targetPosition = Vector3.new(-1040, 201, 90)
-        game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition))
-    end
-})
-
--- Create an "Other" Tab
-local otherTab = Window:MakeTab({
-    Name = "Other",
+-- Others Tab
+local OtherTab = Window:MakeTab({
+    Name = "Others",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
 -- Infinite Yield Button
-otherTab:AddButton({
+OtherTab:AddButton({
     Name = "Infinite Yield",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
@@ -200,7 +135,7 @@ otherTab:AddButton({
 })
 
 -- Dex Explorer Button
-otherTab:AddButton({
+OtherTab:AddButton({
     Name = "Dex Explorer",
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Keyless-mobile-dex-17888"))()
@@ -208,12 +143,12 @@ otherTab:AddButton({
 })
 
 -- SimpleSpy Button
-otherTab:AddButton({
+OtherTab:AddButton({
     Name = "SimpleSpy",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpySource.lua"))()
     end
 })
 
--- Initialize the library
+-- Initialize Orion Library
 OrionLib:Init()
