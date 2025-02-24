@@ -216,7 +216,7 @@ OtherTab:AddButton({
 OtherTab:AddButton({
     Name = "Dex Explorer",
     Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Keyless-mobile-dex-17888"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/insanity54/SimpleSpy/main/SimpleSpySource.lua"))()
     end
 })
 
