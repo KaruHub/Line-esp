@@ -1,5 +1,5 @@
 -- Load the latest version of the Orion library
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
+local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
 
 local correctKey = "Karu!Blocks100"
 local keyLink = "https://loot-link.com/s?LqUQ7P4l"  -- The key link
@@ -14,8 +14,8 @@ local Window = OrionLib:MakeWindow({
 -- Key input function
 local function checkKeyInput(input)
     if input == correctKey then
-        -- Execute the code after successful key entry
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/KaruHub/Line-esp/refs/heads/main/main%202"))()
+        -- Execute the correct loadstring
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/KaruHub/Line-esp/refs/heads/main/esp"))()
         OrionLib:MakeNotification({
             Name = "Success",
             Content = "Correct key entered! Code has been executed.",
@@ -45,15 +45,6 @@ Tab:AddTextbox({
     Default = "",
     TextDisappear = true,
     Callback = function(value)
-        checkKeyInput(value)
-    end
-})
-
--- Optional: Add a button to submit
-Tab:AddButton({
-    Name = "Submit Key",
-    Callback = function()
-        local value = Tab:GetTextbox("Key Input")
         checkKeyInput(value)
     end
 })
