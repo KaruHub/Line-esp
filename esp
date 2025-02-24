@@ -29,58 +29,46 @@ local function CreateESP(player)
 
     -- Configure the tracer
     Tracer.Visible = false
-    Tracer.Color = Color3.new(1, 1, 0) -- Yellow color
+    Tracer.Color = Color3.new(1, 1, 1) -- White color
     Tracer.Thickness = 2
 
     -- Store the Drawing objects in the ESPObjects table
     ESPObjects[player] = {Box = Box, Tracer = Tracer}
-
-    -- Function to update the ESP
-    local function UpdateESP()
-        -- Check if the character and HumanoidRootPart still exist
-        if not character or not character:FindFirstChild("HumanoidRootPart") then
-            Box:Remove()
-            Tracer:Remove()
-            ESPObjects[player] = nil
-            return
-        end
-
-        -- Get the position of the player's HumanoidRootPart
-        local rootPart = character.HumanoidRootPart
-        local position, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
-
-        -- If the player is on the screen, update the ESP
-        if onScreen then
-            -- Calculate the size of the box based on the player's distance from the camera
-            local distance = (rootPart.Position - Camera.CFrame.Position).Magnitude
-            local size = (rootPart.Size.Y * 2) * (Camera.ViewportSize.Y / distance)
-
-            -- Update the box
-            Box.Size = Vector2.new(size, size * 1.5)
-            Box.Position = Vector2.new(position.X - size / 2, position.Y - size * 1.5 / 2)
-            Box.Visible = ESPEnabled
-
-            -- Update the tracer
-            Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y) -- Bottom center of the screen
-            Tracer.To = Vector2.new(position.X, position.Y) -- Player's position
-            Tracer.Visible = ESPEnabled
-        else
-            -- If the player is off-screen, hide the ESP
-            Box.Visible = false
-            Tracer.Visible = false
-        end
-    end
-
-    -- Connect the UpdateESP function to RenderStepped
-    RunService.RenderStepped:Connect(UpdateESP)
 end
 
--- Function to remove ESP for a player
-local function RemoveESP(player)
-    if ESPObjects[player] then
-        ESPObjects[player].Box:Remove()
-        ESPObjects[player].Tracer:Remove()
-        ESPObjects[player] = nil
+-- Function to update the ESP
+local function UpdateESP()
+    for player, esp in pairs(ESPObjects) do
+        local character = player.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local rootPart = character.HumanoidRootPart
+            local position, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+
+            if onScreen then
+                -- Calculate the size of the box based on the player's distance from the camera
+                local distance = (rootPart.Position - Camera.CFrame.Position).Magnitude
+                local size = (rootPart.Size.Y * 2) * (Camera.ViewportSize.Y / distance)
+
+                -- Update the box
+                esp.Box.Size = Vector2.new(size, size * 1.5)
+                esp.Box.Position = Vector2.new(position.X - size / 2, position.Y - size * 1.5 / 2)
+                esp.Box.Visible = ESPEnabled
+
+                -- Update the tracer
+                esp.Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y) -- Bottom center of the screen
+                esp.Tracer.To = Vector2.new(position.X, position.Y) -- Player's position
+                esp.Tracer.Visible = ESPEnabled
+            else
+                -- If the player is off-screen, hide the ESP
+                esp.Box.Visible = false
+                esp.Tracer.Visible = false
+            end
+        else
+            -- If the character no longer exists, remove the ESP
+            esp.Box:Remove()
+            esp.Tracer:Remove()
+            ESPObjects[player] = nil
+        end
     end
 end
 
@@ -89,7 +77,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.E then
         ESPEnabled = not ESPEnabled
-        for player, esp in pairs(ESPObjects) do
+        for _, esp in pairs(ESPObjects) do
             esp.Box.Visible = ESPEnabled
             esp.Tracer.Visible = ESPEnabled
         end
@@ -112,5 +100,17 @@ end)
 
 -- Remove ESP for leaving players
 Players.PlayerRemoving:Connect(function(player)
-    RemoveESP(player)
+    if ESPObjects[player] then
+        ESPObjects[player].Box:Remove()
+        ESPObjects[player].Tracer:Remove()
+        ESPObjects[player] = nil
+    end
 end)
+
+-- Refresh ESP every 3 seconds
+while true do
+    if ESPEnabled then
+        UpdateESP()
+    end
+    wait(3) -- Wait 3 seconds before refreshing
+end
