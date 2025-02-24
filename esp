@@ -36,7 +36,16 @@ local function CreateESP(player)
     ESPObjects[player] = {Box = Box, Tracer = Tracer}
 end
 
--- Function to update the ESP
+-- Function to remove ESP for a player
+local function RemoveESP(player)
+    if ESPObjects[player] then
+        ESPObjects[player].Box:Remove()
+        ESPObjects[player].Tracer:Remove()
+        ESPObjects[player] = nil
+    end
+end
+
+-- Function to update the ESP visuals
 local function UpdateESP()
     for player, esp in pairs(ESPObjects) do
         local character = player.Character
@@ -65,9 +74,24 @@ local function UpdateESP()
             end
         else
             -- If the character no longer exists, remove the ESP
-            esp.Box:Remove()
-            esp.Tracer:Remove()
-            ESPObjects[player] = nil
+            RemoveESP(player)
+        end
+    end
+end
+
+-- Function to refresh all players (recreate ESP for new players, remove for players who left)
+local function RefreshPlayers()
+    local currentPlayers = Players:GetPlayers()
+    for _, player in ipairs(currentPlayers) do
+        if player ~= LocalPlayer and not ESPObjects[player] then
+            CreateESP(player)
+        end
+    end
+
+    -- Remove ESP for players who left
+    for player in pairs(ESPObjects) do
+        if not table.find(currentPlayers, player) then
+            RemoveESP(player)
         end
     end
 end
@@ -84,7 +108,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Add ESP for existing players
+-- Initial ESP creation for existing players
 for _, player in ipairs(Players:GetPlayers()) do
     if player ~= LocalPlayer then
         CreateESP(player)
@@ -100,17 +124,19 @@ end)
 
 -- Remove ESP for leaving players
 Players.PlayerRemoving:Connect(function(player)
-    if ESPObjects[player] then
-        ESPObjects[player].Box:Remove()
-        ESPObjects[player].Tracer:Remove()
-        ESPObjects[player] = nil
-    end
+    RemoveESP(player)
 end)
 
--- Refresh ESP every 3 seconds
+-- Update ESP visuals every 0.1 seconds
 while true do
     if ESPEnabled then
         UpdateESP()
     end
-    wait(3) -- Wait 3 seconds before refreshing
+    wait(0.1) -- Update every 0.1 seconds
+end
+
+-- Refresh all players every 3 seconds
+while true do
+    RefreshPlayers()
+    wait(3) -- Refresh every 3 seconds
 end
