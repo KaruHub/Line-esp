@@ -8,7 +8,7 @@ local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
 -- ESP Settings
-local ESPEnabled = false
+local ESPEnabled = true
 local ESPObjects = {}
 
 -- Function to create ESP for a player
@@ -49,26 +49,19 @@ local function CreateESP(player)
         local rootPart = character.HumanoidRootPart
         local position, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
 
-        -- If the player is on the screen, update the ESP
-        if onScreen then
-            -- Calculate the size of the box based on the player's distance from the camera
-            local distance = (rootPart.Position - Camera.CFrame.Position).Magnitude
-            local size = (rootPart.Size.Y * 2) * (Camera.ViewportSize.Y / distance)
+        -- Calculate the size of the box based on the player's distance from the camera
+        local distance = (rootPart.Position - Camera.CFrame.Position).Magnitude
+        local size = (rootPart.Size.Y * 2) * (Camera.ViewportSize.Y / distance)
 
-            -- Update the box
-            Box.Size = Vector2.new(size, size * 1.5)
-            Box.Position = Vector2.new(position.X - size / 2, position.Y - size * 1.5 / 2)
-            Box.Visible = ESPEnabled
+        -- Update the box (always visible)
+        Box.Size = Vector2.new(size, size * 1.5)
+        Box.Position = Vector2.new(position.X - size / 2, position.Y - size * 1.5 / 2)
+        Box.Visible = ESPEnabled
 
-            -- Update the tracer (360° effect)
-            Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y) -- Bottom center of the screen
-            Tracer.To = Vector2.new(position.X, position.Y) -- Player's position
-            Tracer.Visible = ESPEnabled
-        else
-            -- If the player is off-screen, hide the ESP
-            Box.Visible = false
-            Tracer.Visible = false
-        end
+        -- Update the tracer (always visible, 360° effect)
+        Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y) -- Bottom center of the screen
+        Tracer.To = Vector2.new(position.X, position.Y) -- Player's position
+        Tracer.Visible = ESPEnabled
     end
 
     -- Connect the UpdateESP function to RenderStepped
