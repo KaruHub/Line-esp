@@ -1,12 +1,43 @@
 -- Load Orion Library
 local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
 
--- Create a Window
+-- Wait for character to load
+local player = game.Players.LocalPlayer
+local function getCharacter()
+    return player.Character or player.CharacterAdded:Wait()
+end
+
+-- Table storing bridge models
+local bridges = {
+    BlueBridge = game.Workspace:FindFirstChild("BlueBridge"),
+    CyanBridge = game.Workspace:FindFirstChild("CyanBridge"),
+    GreenBridge = game.Workspace:FindFirstChild("GreenBridge"),
+    OrangeBridge = game.Workspace:FindFirstChild("OrangeBridge"),
+    PinkBridge = game.Workspace:FindFirstChild("PinkBridge"),
+    PurpleBridge = game.Workspace:FindFirstChild("PurpleBridge"),
+    RedBridge = game.Workspace:FindFirstChild("RedBridge"),
+    YellowBridge = game.Workspace:FindFirstChild("YellowBridge")
+}
+
+-- Function to teleport to a bridge
+local function teleportToBridge(bridgeName)
+    local character = getCharacter()
+    local bridge = bridges[bridgeName]
+
+    if bridge then
+        local targetPosition = bridge:FindFirstChild("PrimaryPart") and bridge.PrimaryPart.Position or bridge:GetBoundingBox().Position
+        character:MoveTo(targetPosition + Vector3.new(0, 5, 0)) -- Teleport slightly above the bridge
+    else
+        warn("Bridge not found: " .. tostring(bridgeName))
+    end
+end
+
+-- Create Orion UI Window
 local Window = OrionLib:MakeWindow({
     Name = "Bridge Teleporter & ESP",
     HidePremium = false,
     SaveConfig = true,
-    ConfigFolder = "OrionTest"
+    ConfigFolder = "OrionBridgeTP"
 })
 
 -- Player Tab
@@ -29,7 +60,7 @@ PlayerTab:AddSlider({
     Default = 16,
     Increment = 1,
     Callback = function(Value)
-        local character = game.Players.LocalPlayer.Character
+        local character = getCharacter()
         if character and character:FindFirstChild("Humanoid") then
             character.Humanoid.WalkSpeed = Value
         else
@@ -46,7 +77,7 @@ PlayerTab:AddSlider({
     Default = 50,
     Increment = 1,
     Callback = function(Value)
-        local character = game.Players.LocalPlayer.Character
+        local character = getCharacter()
         if character and character:FindFirstChild("Humanoid") then
             character.Humanoid.JumpPower = Value
         else
@@ -71,7 +102,7 @@ PlayerTab:AddSlider({
 PlayerTab:AddButton({
     Name = "Teleport to Center",
     Callback = function()
-        local character = game.Players.LocalPlayer.Character
+        local character = getCharacter()
         if character and character:FindFirstChild("HumanoidRootPart") then
             character.HumanoidRootPart.CFrame = CFrame.new(-1040, 201, 90)
         else
@@ -153,32 +184,6 @@ PlayerTab:AddColorpicker({
         end
     end
 })
-
--- Bridge Teleportation
-local bridges = {
-    BlueBridge = game.Workspace:FindFirstChild("BlueBridge"),
-    CyanBridge = game.Workspace:FindFirstChild("CyanBridge"),
-    GreenBridge = game.Workspace:FindFirstChild("GreenBridge"),
-    OrangeBridge = game.Workspace:FindFirstChild("OrangeBridge"),
-    PinkBridge = game.Workspace:FindFirstChild("PinkBridge"),
-    PurpleBridge = game.Workspace:FindFirstChild("PurpleBridge"),
-    RedBridge = game.Workspace:FindFirstChild("RedBridge"),
-    YellowBridge = game.Workspace:FindFirstChild("YellowBridge")
-}
-
-local function teleportToBridge(bridgeName)
-    local bridge = bridges[bridgeName]
-    if bridge and bridge.PrimaryPart then
-        local character = game.Players.LocalPlayer.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            character.HumanoidRootPart.CFrame = bridge.PrimaryPart.CFrame
-        else
-            warn("Character or HumanoidRootPart not found!")
-        end
-    else
-        warn("Bridge not found or missing PrimaryPart: " .. tostring(bridgeName))
-    end
-end
 
 -- Bridges Dropdown
 PlayerTab:AddDropdown({
