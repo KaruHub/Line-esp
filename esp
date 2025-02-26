@@ -34,7 +34,7 @@ end
 
 -- Create Orion UI Window
 local Window = OrionLib:MakeWindow({
-    Name = "Karu Blocks Hub",
+    Name = "Critic Lucky Blocks GUI🍋",
     HidePremium = false,
     SaveConfig = true,
     ConfigFolder = "KaruBlocksHub"
